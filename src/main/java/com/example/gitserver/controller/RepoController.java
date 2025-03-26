@@ -2,6 +2,7 @@ package com.example.gitserver.controller;
 
 import com.example.gitserver.dto.RepoInfoDto;
 import com.example.gitserver.service.RepoService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ public class RepoController {
     private final RepoService repoService;
 
     @PostMapping
-    public ResponseEntity<Void> createRepo(@RequestBody RepoInfoDto repoInfoDto){
+    public ResponseEntity<Void> createRepo(@Valid @RequestBody RepoInfoDto repoInfoDto){
         repoService.createRepo(repoInfoDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
