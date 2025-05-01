@@ -62,20 +62,10 @@ public class BranchService {
     }
 
     private List<String> getBranchNames(File gitDir) {
-        List<String> branches = new ArrayList<>();
         List<String> command = List.of("git", "for-each-ref", "--format=%(refname:short)", "refs/heads/");
-
-        try (BufferedReader reader = GitCommandUtil.execute(gitDir, command)) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                branches.add(line.trim());
-            }
-        } catch (IOException | InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("브랜치 정보를 가져오는 중 오류 발생", e);
-        }
-
-        return branches;
+        return GitCommandUtil.executeLines(gitDir, command).stream()
+                .map(String::trim)
+                .toList();
     }
 
 

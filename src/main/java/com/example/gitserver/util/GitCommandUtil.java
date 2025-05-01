@@ -42,4 +42,17 @@ public class GitCommandUtil {
         }
     }
 
+    public static List<String> executeLines(File directory, List<String> command) {
+        try (BufferedReader reader = execute(directory, command)) {
+            return reader.lines().collect(Collectors.toList());
+        } catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Git 명령어 실행 중 오류 발생: " + String.join(" ", command), e);
+        }
+    }
+
+    public static String executeAndGetOutput(File directory, List<String> command) {
+        return String.join("\n", executeLines(directory, command));
+    }
+
 }
