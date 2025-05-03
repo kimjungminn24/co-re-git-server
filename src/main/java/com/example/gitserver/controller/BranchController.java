@@ -2,6 +2,7 @@ package com.example.gitserver.controller;
 
 import com.example.gitserver.dto.BranchDto;
 import com.example.gitserver.dto.CompareBranchResponseDto;
+import com.example.gitserver.dto.FileDto;
 import com.example.gitserver.dto.RepoInfoDto;
 import com.example.gitserver.service.BranchService;
 import com.example.gitserver.service.RepoService;
@@ -36,6 +37,18 @@ public class BranchController {
         List<CompareBranchResponseDto> branches = branchService.compareBranchHead(owner, repo,base,head);
         return ResponseEntity.ok(branches);
     }
+
+    @GetMapping("/{owner}/{repo}/compare/{base}/{head}/file")
+    public ResponseEntity<List<FileDto>> getChangeFiles(
+            @PathVariable String owner,
+            @PathVariable String repo,
+            @PathVariable String base,
+            @PathVariable String head
+    ) {
+        List<FileDto> branches = branchService.getChangedFiles(owner, repo,base,head);
+        return ResponseEntity.ok(branches);
+    }
+
 
 
 }
