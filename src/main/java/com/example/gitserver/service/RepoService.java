@@ -16,11 +16,13 @@ import java.util.stream.Stream;
 @Service
 public class RepoService {
 
-    public void createRepo(RepoInfoDto info){
+    public void createRepo(RepoInfoDto info) {
         try {
             File repoDir = new File("/home/" + info.userName() + "/" + info.repoName() + ".git");
             repoDir.mkdirs();
             GitCommandUtil.executeLines(repoDir, List.of("git", "init", "--bare"));
+            createPostReceiveHook(repoDir, info);
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -72,6 +74,26 @@ public class RepoService {
                 deleteDirectory(tempDir);
             }
         }
+    }
+
+    private void createPostReceiveHook(File repoDir, RepoInfoDto info) throws IOException {
+        File hooksDir = new File(repoDir, "hooks");
+        File postReceiveHook = new File(hooksDir, "post-receive");
+
+        String hookScript = String.format("""
+                #!/bin/bash
+                while read oldrev newrev refname
+                do
+                  branch=$(echo $refname | sed 's|refs/heads/||')
+                  echo "브랜치 $branch 에 푸시됨: $oldrev → $newrev"
+                  curl -X POST http://code-review-server:8081/git \\
+                       -H "Content-Type: application/json" \\
+                       -d "{\\"owner\\": \\"%s\\", \\"repo\\": \\"%s\\", \\"branch\\": \\"$branch\\", \\"from\\": \\"$oldrev\\", \\"to\\": \\"$newrev\\"}"
+                done
+                """, info.userName(), info.repoName());
+
+        Files.writeString(postReceiveHook.toPath(), hookScript);
+        postReceiveHook.setExecutable(true);
     }
 
 
